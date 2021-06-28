@@ -1,5 +1,12 @@
 import os
 
+# Setup detectron2 logger
+import detectron2
+from detectron2.utils.logger import setup_logger
+setup_logger()
+
+
+
 import pandas as pd
 from torch.utils.data import Dataset
 from PIL import Image
