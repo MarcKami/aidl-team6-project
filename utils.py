@@ -15,7 +15,7 @@ class HyperParams():
     dataset_root = "C:\DeepLearning\cityscapes"
     model_folder = r"C:\DeepLearning\aidl-team6-project\models"
     model_good = r"C:\DeepLearning\aidl-team6-project\models\model_good"
-    num_samples = 4
+    num_samples = 30
     batch_size_train = 2
     batch_size_val = 2
     num_classes = 1+8
@@ -24,7 +24,7 @@ class HyperParams():
     max_size = 600
     lr = 0.0003
     weight_decay = 0.0001
-    epochs = 1
+    epochs = 10
 
 def save_model(model, optimizer, loss, path):
     checkpoint = { 

@@ -28,10 +28,10 @@ parameters = list(model.roi_heads.box_predictor.parameters()) + list(model.roi_h
 optimizer = optim.Adam(parameters, lr=HyperParams.lr, weight_decay=HyperParams.weight_decay)
 
 # Train
-#train_model(model, optimizer, data_loader_train)
+train_model(model, optimizer, data_loader_train, data_loader_val)
 
 # Load Pre-Trained Model
-load_model(model, optimizer)
+#load_model(model, optimizer)
 
 # Show visual results
 ShowResults(model, dataset_val[3])

@@ -28,11 +28,13 @@ def Team6_MaskRCNN(num_classes: int, hidden_layer: int, min_size: int, max_size:
 
     return model
 
-def train_model(model, optimizer, dataloader):
+def train_model(model, optimizer, dataloader_train, dataloader_val):
     model.to(device)
     model.train()
     for e in range(HyperParams.epochs):
-        for i, (images, targets) in enumerate(dataloader):
+        # TRAIN
+        print('Training epoch ' + str(e))
+        for i, (images, targets) in enumerate(dataloader_train):
             optimizer.zero_grad()
             loss_dict = model(images, targets)
             loss = sum(loss for loss in loss_dict.values())
@@ -41,9 +43,19 @@ def train_model(model, optimizer, dataloader):
             
             if i%1 == 0:
                 loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
-                print(f"[{(i+1)*dataloader.batch_size}/{len(dataloader.dataset)}] loss: {loss_dict_printable}")
+                print(f"[{(i+1)*dataloader_train.batch_size}/{len(dataloader_train.dataset)}] loss: {loss_dict_printable}")
 
-        # Save model
-        name = 'model_epoch_' + str(e+1)
-        save_model(model, optimizer, loss, path=os.path.join(HyperParams.model_folder, name))
-        print('Model ' + name + ' saved!')
+        # # EVAL
+        # print('Evaluating epoch ' + str(e))
+        # for i, (images, targets) in enumerate(dataloader_val):
+        #     loss_dict = model(images, targets)
+        #     loss = sum(loss for loss in loss_dict.values())
+            
+        #     if i%1 == 0:
+        #         loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
+        #         print(f"[{(i+1)*dataloader_val.batch_size}/{len(dataloader_val.dataset)}] loss: {loss_dict_printable}")   
+
+        # # Save model
+        # name = 'model_epoch_' + str(e+1)
+        # save_model(model, optimizer, loss, path=os.path.join(HyperParams.model_folder, name))
+        # print('Model ' + name + ' saved!')
