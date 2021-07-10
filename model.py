@@ -1,25 +1,49 @@
 import torch
+import os
 import torch.nn as nn
-import torch.nn.functional as F
+import torchvision.models.detection as detection
+from collections import OrderedDict
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from utils import HyperParams, save_model
 
-class MyModel(nn.Module):
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def __init__(self, h1=32, h2=64, h3=128, h4=128):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, h1, 3, padding=1)
-        self.conv2 = nn.Conv2d(h1, h2, 3, padding=1)
-        self.conv3 = nn.Conv2d(h2, h3, 3, padding=1)
+def Team6_MaskRCNN(num_classes: int, hidden_layer: int, min_size: int, max_size: int, pretrained = True):
+    model = detection.maskrcnn_resnet50_fpn(pretrained=pretrained, min_size=min_size, max_size=max_size)
+    
+    # get the number of input features for the classifier
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(
+                in_features,
+                num_classes)
 
-        self.fc1 = nn.Linear(8*8*h3, h4)
-        self.fc2 = nn.Linear(h4, 15)
+    # now get the number of input features for the mask classifier
+    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+    # and replace the mask predictor with a new one
+    model.roi_heads.mask_predictor = nn.Sequential(OrderedDict([
+                    ("conv5_mask", nn.ConvTranspose2d(in_channels=in_features_mask, out_channels=hidden_layer, kernel_size=2, stride=2)),
+                    ("relu", nn.ReLU(inplace=True)),
+                    ("mask_fcn_logits", nn.Conv2d(in_channels= hidden_layer, out_channels=num_classes, kernel_size=1))]))
 
-        self.pool = nn.MaxPool2d(2)
+    return model
 
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = torch.flatten(x, start_dim=1)
+def train_model(model, optimizer, dataloader):
+    model.to(device)
+    model.train()
+    for e in range(HyperParams.epochs):
+        for i, (images, targets) in enumerate(dataloader):
+            optimizer.zero_grad()
+            loss_dict = model(images, targets)
+            loss = sum(loss for loss in loss_dict.values())
+            loss.backward()
+            optimizer.step()
+            
+            if i%1 == 0:
+                loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
+                print(f"[{(i+1)*dataloader.batch_size}/{len(dataloader.dataset)}] loss: {loss_dict_printable}")
 
-        x = F.relu(self.fc1(x))
-        return self.fc2(x)
+        # Save model
+        name = 'model_epoch_' + str(e+1)
+        save_model(model, optimizer, loss, path=os.path.join(HyperParams.model_folder, name))
+        print('Model ' + name + ' saved!')
