@@ -4,15 +4,14 @@ from utils import HyperParams, collate_fn, ShowResults, load_model
 from model import Team6_MaskRCNN, train_model
 import torch.optim as optim
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 # Load Dataset
 dataset_train = CityscapesInstanceSegmentation(root=HyperParams.dataset_root, split='train')
 dataset_val = CityscapesInstanceSegmentation(root=HyperParams.dataset_root, split='val')
 
 # Load images in memory to train faster
-for idx in range(HyperParams.num_samples):
+for idx in range(HyperParams.num_samples_train):
   dataset_train.append_images_targets(idx)
+for idx in range(HyperParams.num_samples_val):
   dataset_val.append_images_targets(idx)
 
 # Data Loader  
@@ -29,6 +28,7 @@ optimizer = optim.Adam(parameters, lr=HyperParams.lr, weight_decay=HyperParams.w
 
 # Train
 train_model(model, optimizer, data_loader_train, data_loader_val)
+#train_model(model, optimizer, data_loader_train, data_loader_val, plot=False)
 
 # Load Pre-Trained Model
 #load_model(model, optimizer)

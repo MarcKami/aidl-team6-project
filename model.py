@@ -4,7 +4,7 @@ import torch.nn as nn
 import torchvision.models.detection as detection
 from collections import OrderedDict
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from utils import HyperParams, save_model
+from utils import HyperParams, Losses, plot_losses, save_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -31,9 +31,12 @@ def Team6_MaskRCNN(num_classes: int, hidden_layer: int, min_size: int, max_size:
 def train_model(model, optimizer, dataloader_train, dataloader_val):
     model.to(device)
     model.train()
+    train_losses = Losses()
+    val_losses = Losses()
     for e in range(HyperParams.epochs):
         # TRAIN
         print('Training epoch ' + str(e))
+        train_losses.reset()
         for i, (images, targets) in enumerate(dataloader_train):
             optimizer.zero_grad()
             loss_dict = model(images, targets)
@@ -45,17 +48,29 @@ def train_model(model, optimizer, dataloader_train, dataloader_val):
                 loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
                 print(f"[{(i+1)*dataloader_train.batch_size}/{len(dataloader_train.dataset)}] loss: {loss_dict_printable}")
 
-        # # EVAL
-        # print('Evaluating epoch ' + str(e))
-        # for i, (images, targets) in enumerate(dataloader_val):
-        #     loss_dict = model(images, targets)
-        #     loss = sum(loss for loss in loss_dict.values())
+            train_losses.sum(loss, loss_dict, len(images))
+
+        train_losses.mean(len(dataloader_train.dataset))
+        train_losses.toList()
+
+        # EVAL
+        print('Evaluating epoch ' + str(e))        
+        val_losses.reset()
+        for i, (images, targets) in enumerate(dataloader_val):
+            loss_dict = model(images, targets)
+            loss = sum(loss for loss in loss_dict.values())
             
-        #     if i%1 == 0:
-        #         loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
-        #         print(f"[{(i+1)*dataloader_val.batch_size}/{len(dataloader_val.dataset)}] loss: {loss_dict_printable}")   
+            if i%1 == 0:
+                loss_dict_printable = {k: f"{v.item():.2f}" for k, v in loss_dict.items()}
+                print(f"[{(i+1)*dataloader_val.batch_size}/{len(dataloader_val.dataset)}] loss: {loss_dict_printable}")   
+            
+            val_losses.sum(loss, loss_dict, len(images))
+
+        val_losses.mean(len(dataloader_val.dataset))
+        val_losses.toList()
 
         # # Save model
         # name = 'model_epoch_' + str(e+1)
-        # save_model(model, optimizer, loss, path=os.path.join(HyperParams.model_folder, name))
+        # save_model(model, optimizer, train_losses, val_losses, path=os.path.join(HyperParams.model_folder, name))
         # print('Model ' + name + ' saved!')
+    plot_losses(train_losses, val_losses)

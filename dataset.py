@@ -255,13 +255,24 @@ class CityscapesInstanceSegmentation(Dataset):
         image = self.img[index]
         targets = self.targets[index]
 
+        image = torch.tensor(image).to(device)
+
+        masks = [m for m in targets["masks"]]        
+        boxes = [b for b in targets["boxes"]]     
+        labels = [l for l in targets["labels"]]    
+
+        targets = {"boxes": torch.tensor(np.stack(boxes), dtype= torch.float32, device=device), 
+                  "labels": torch.tensor(np.stack(labels), dtype=torch.int64, device=device),
+                  "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device=device)}
+
         return image, targets
 
     def append_images_targets (self, index: int):
         #print(f'Image path{self.images[index]}')        
         image = Image.open(self.images[index]).convert('RGB')         
         #convert to tensor in the range [0.0, 1.0]
-        image = transforms.ToTensor()(image).to(device)  #torch.Size([3,1024, 2048])
+        #image = transforms.ToTensor()(image).to(device)  #torch.Size([3,1024, 2048])
+        image = transforms.ToTensor()(image)  #torch.Size([3,1024, 2048])
         
         #targets
         labels = self.labels_from_mask(index)
@@ -274,20 +285,26 @@ class CityscapesInstanceSegmentation(Dataset):
           mask = ImageOps.invert(mask) # 0:background, 1:instance
           masks.append(mask)
 
-        targets = {"boxes": torch.tensor(boxes, dtype= torch.float32, device=device), 
-                   "labels": torch.tensor(labels, dtype=torch.int64, device=device),
-                   "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device=device)}
+        # targets = {"boxes": torch.tensor(boxes, dtype= torch.float32, device=device), 
+        #            "labels": torch.tensor(labels, dtype=torch.int64, device=device),
+        #            "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device=device)}
+
+        targets = {"boxes": torch.tensor(boxes, dtype= torch.float32, device='cpu'), 
+                   "labels": torch.tensor(labels, dtype=torch.int64, device='cpu'),
+                   "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device='cpu')}
         
         masks = [m for m in targets["masks"]] 
         norm_masks = []
         for mask in masks:  
-          mask = np.asarray(mask.cpu())     
+          #mask = np.asarray(mask.cpu())  
+          mask = np.asarray(mask)     
           max = np.max(mask)
           min = np.min(mask)
           mask = np.array([(x - min) / (max - min) for x in mask])
           norm_masks.append(mask)
 
-        targets["masks"] = torch.tensor(np.stack(norm_masks), dtype=torch.uint8, device=device)
+        #targets["masks"] = torch.tensor(np.stack(norm_masks), dtype=torch.uint8, device=device)
+        targets["masks"] = torch.tensor(np.stack(norm_masks), dtype=torch.uint8, device='cpu')
 
         self.img.append(image)
         self.targets.append(targets)
