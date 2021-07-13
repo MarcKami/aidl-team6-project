@@ -53,7 +53,7 @@ data/
     1. Go to `aux_scripts/process_filename.py` and change path on line 7:
 `path = './leftImg8bit/train/aachen/'`
     2. Run `python aux_scripts/process_filename.py`
-    3. Repeat steps 2.1 and 2.2 for every city in the dataset
+    3. Repeat steps `i` and `ii` for every city in the dataset
 
 3. Define the instance classes. Use `cityscapesScripts/cityscapesscripts/helpers/label.py` to modify the trainIds as suitable for your model. Assign the label 255 to classes that you want to ignore during the training.
 
@@ -89,6 +89,33 @@ The model states are going to be saved inside models folder. To do inference you
 To see graphical results or also check the whole process, we used [Visual Studio Code](https://code.visualstudio.com/download) with Python and Jupyter packages. Then you can run the code running `main.py` or `inference.py` file running it in an interactive window.
 
 ![VSCode](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/VSCode.PNG)
+
+# Cityscapes
+
+This project uses the well-known Cityscapes dataset, which contains a diverse set of stereo video sequences recorded in street scenes from 50 different German cities, with high quality pixel-level annotations of 5000 frames in addition to a larger set of 20000 weakly annotated frames.  In our project we only used the fine annotated images.
+
+![CityscapesExample](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/CityscapesExample.PNG)
+
+Since the goal was to detect up to 8 different classes in an image, a summary of the samples for both; train and validation is given down below:
+
+| Label/Class   | Train Sample  |
+| ------------- |-------------- |
+| Person        | 17.9k         |
+| Rider         | 1.8k          |
+| Car           | 26.9k         |
+| Truck         | 0.5k          |
+| Bus           | 0.4k          |
+| Train         | 0.2k          |
+| Cycle         | 0.7k          |
+| Bicycle       | 3.7k          |
+
+
+The scope of this project was to enable the detection of objects among eight different options. Nevertheless, the number of options can be customised when creating the class model. The following image shows the case of this project in which 1 + 8 classes were selected, being 1 the class related to the background. 
+
+![NumClasses](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/NumClasses.PNG)
+
+## Preparation
+
 
 # Experiments
 - [Experiment 1](#Experiment-1)
