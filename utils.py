@@ -191,28 +191,28 @@ def ShowResults(model, sample = None, image = None):
     plt.figure(figsize=(20,10))  
     plt.imshow(np.asarray(raw_img))
     
-    transformed_img_copy = img.copy()
+    # transformed_img_copy = img.copy()
 
     label2name={label.trainId:label.name for label in CityscapesInstanceSegmentation.labels if label.name in CityscapesInstanceSegmentation.mask_list}
-    label2color={label.trainId:label.color for label in CityscapesInstanceSegmentation.labels if label.name in CityscapesInstanceSegmentation.mask_list}
+    # label2color={label.trainId:label.color for label in CityscapesInstanceSegmentation.labels if label.name in CityscapesInstanceSegmentation.mask_list}
 
-    #overlap masks
-    for box, label, mask in zip(boxes, labels, masks):
-        mask = (mask.cpu().numpy()*50).astype(np.int8)  
-        mask = mask.squeeze(0)
-        mask_im = Image.fromarray(mask, mode="L")
-        full_color = Image.new("RGB", transformed_img_copy.size, (0, 255, 0))
-        transformed_img_copy = Image.composite(full_color, transformed_img_copy, mask_im)
+    # #overlap masks
+    # for box, label, mask in zip(boxes, labels, masks):
+    #     mask = (mask.cpu().numpy()*50).astype(np.int8)  
+    #     mask = mask.squeeze(0)
+    #     mask_im = Image.fromarray(mask, mode="L")
+    #     full_color = Image.new("RGB", transformed_img_copy.size, (0, 255, 0))
+    #     transformed_img_copy = Image.composite(full_color, transformed_img_copy, mask_im)
     
-    plt.figure(figsize=(20,10))  
-    plt.imshow(np.asarray(transformed_img_copy))
+    # plt.figure(figsize=(20,10))  
+    # plt.imshow(np.asarray(transformed_img_copy))
 
     print(label2name)
     print(len(CityscapesInstanceSegmentation.mask_list))
     labels = [l.item() for l in labels]
     if (sample != None):
         print(f"ground truth labels: {targets['labels']}, len: {len(targets['labels'])}")
-        print(f'predicted labels: {labels}, len: {len(labels)}')
+    print(f'predicted labels: {labels}, len: {len(labels)}')
 
     COLORS = np.random.uniform(128, 255, size=(100, 3))
     alpha = 1 
