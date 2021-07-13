@@ -166,11 +166,8 @@ class CityscapesInstanceSegmentation(Dataset):
         self.root = root
         self.split = split
         self.images_dir = os.path.join(self.root, 'leftImg8bit', self.split)
-        #print(f'images_dir={self.images_dir}')
         self.json_dir = os.path.join(self.root, 'Json_Files', self.split)
-        #print(f'json_dir={self.json_dir}')
         self.masks_dir = os.path.join(self.root, 'gtFine', self.split)
-        #print(f'masks_dir={self.masks_dir}')   
         
         self.images = []
         self.json_files = []
@@ -267,12 +264,9 @@ class CityscapesInstanceSegmentation(Dataset):
 
         return image, targets
 
-    def append_images_targets (self, index: int):
-        #print(f'Image path{self.images[index]}')        
+    def append_images_targets (self, index: int):     
         image = Image.open(self.images[index]).convert('RGB')         
-        #convert to tensor in the range [0.0, 1.0]
-        #image = transforms.ToTensor()(image).to(device)  #torch.Size([3,1024, 2048])
-        image = transforms.ToTensor()(image)  #torch.Size([3,1024, 2048])
+        image = transforms.ToTensor()(image)
         
         #targets
         labels = self.labels_from_mask(index)
@@ -285,10 +279,6 @@ class CityscapesInstanceSegmentation(Dataset):
           mask = ImageOps.invert(mask) # 0:background, 1:instance
           masks.append(mask)
 
-        # targets = {"boxes": torch.tensor(boxes, dtype= torch.float32, device=device), 
-        #            "labels": torch.tensor(labels, dtype=torch.int64, device=device),
-        #            "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device=device)}
-
         targets = {"boxes": torch.tensor(boxes, dtype= torch.float32, device='cpu'), 
                    "labels": torch.tensor(labels, dtype=torch.int64, device='cpu'),
                    "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device='cpu')}
@@ -296,14 +286,12 @@ class CityscapesInstanceSegmentation(Dataset):
         masks = [m for m in targets["masks"]] 
         norm_masks = []
         for mask in masks:  
-          #mask = np.asarray(mask.cpu())  
           mask = np.asarray(mask)     
           max = np.max(mask)
           min = np.min(mask)
           mask = np.array([(x - min) / (max - min) for x in mask])
           norm_masks.append(mask)
 
-        #targets["masks"] = torch.tensor(np.stack(norm_masks), dtype=torch.uint8, device=device)
         targets["masks"] = torch.tensor(np.stack(norm_masks), dtype=torch.uint8, device='cpu')
 
         self.img.append(image)
@@ -323,7 +311,6 @@ class CityscapesInstanceSegmentation(Dataset):
 
     def labels_from_json (self, index):
       data = self._load_json(self.json_files[index])
-      #data = {'imgHeight': 1024, 'imgWidth': 2048, 'objects': [{'label': 'building', polygon': [[0, 0], [2047, 0], [2047, 693], [0, 666]]}, {'label': 'road'
 
       # Create dictionaries for a fast lookup
       name2label={label.name:label for label in CityscapesInstanceSegmentation.labels}
@@ -358,30 +345,22 @@ class CityscapesInstanceSegmentation(Dataset):
 
     def boxes_from_json(self, index):
       data = self._load_json(self.json_files[index])
-      #data = {'imgHeight': 1024, 'imgWidth': 2048, 'objects': [{'label': 'building', polygon': [[0, 0], [2047, 0], [2047, 693], [0, 666]]}, {'label': 'road', 'polygon':
       
       boxes = []
-      #boxes (``FloatTensor[N, 4]``): the ground-truth boxes in ``[x1, y1, x2, y2]`` format, with 0 <= x1 < x2 <= W`` and ``0 <= y1 < y2 <= H``
       
       for item in data['objects']:  
-        if not item['label'] in CityscapesInstanceSegmentation.mask_list: pass
-          #print(f"label: {item['label']}")
-      
+        if not item['label'] in CityscapesInstanceSegmentation.mask_list: pass      
         else:
           polygon = item['polygon']
-          #print(f'polygon {polygon}')
           x1 = np.minimum.reduce(polygon)[0]
           x2 = np.maximum.reduce(polygon)[0]
           y1 = np.minimum.reduce(polygon)[1]
           y2 = np.maximum.reduce(polygon)[1]
           box = [x1,y1,x2,y2]
-          #print(f"label: {item['label']}, box: {box}")
           boxes.append(box)
-      #print(f'Num boxes: {len(boxes)}')
       return boxes
 
     def __len__(self) -> int:
-        #return len(self.images)
         return len(self.img)
 
     def extra_repr(self) -> str:

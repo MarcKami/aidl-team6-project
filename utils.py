@@ -15,17 +15,17 @@ class HyperParams():
     dataset_root = "C:\DeepLearning\cityscapes"
     model_folder = r"C:\DeepLearning\aidl-team6-project\models"
     model_good = r"C:\DeepLearning\aidl-team6-project\models\model_good"
-    num_samples_train = 120
-    num_samples_val = 20
+    num_samples_train = 10
+    num_samples_val = 10
     batch_size_train = 4
     batch_size_val = 2
     num_classes = 1+8
     hidden_layer = 256
-    min_size = 400
-    max_size = 600
-    lr = 0.0003
+    min_size = 800
+    max_size = 1024
+    lr = 0.001
     weight_decay = 0.0001
-    epochs = 50
+    epochs = 10
 
 class Losses():
     def __init__(self):
@@ -83,10 +83,11 @@ def save_model(model, optimizer, train_losses, val_losses, path):
         "val_losses": val_losses}
     torch.save(checkpoint, path)
 
-def load_model(model, optimizer):
+def load_model(model, optimizer = None):
     checkpoint = torch.load(HyperParams.model_good, map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    if (optimizer != None):
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
 def collate_fn(batch):
     images = []
@@ -162,11 +163,17 @@ def plot_losses(train_losses: Losses, val_losses: Losses):
 
     fig.tight_layout()
 
-def ShowResults(model, sample):
+def ShowResults(model, sample = None, image = None):
+    if(sample != None):
+        img,targets = sample
+    if(image != None):
+        img = image
+    if(sample == None and image == None):
+        return None
+
     with torch.no_grad():
         model = model.cpu()
         model.eval()
-        img,targets = sample
         detections = model([img.cpu()])
 
     detections= detections[0]
@@ -180,6 +187,10 @@ def ShowResults(model, sample):
     masks = [m for i,m in enumerate(detections['masks']) if i in keep_idx]
 
     img = to_pil_image(img)
+    raw_img = img.copy()
+    plt.figure(figsize=(20,10))  
+    plt.imshow(np.asarray(raw_img))
+    
     transformed_img_copy = img.copy()
 
     label2name={label.trainId:label.name for label in CityscapesInstanceSegmentation.labels if label.name in CityscapesInstanceSegmentation.mask_list}
@@ -199,8 +210,9 @@ def ShowResults(model, sample):
     print(label2name)
     print(len(CityscapesInstanceSegmentation.mask_list))
     labels = [l.item() for l in labels]
-    print(f"ground truth labels: {targets['labels']}, len: {len(targets['labels'])}")
-    print(f'predicted labels: {labels}, len: {len(labels)}')
+    if (sample != None):
+        print(f"ground truth labels: {targets['labels']}, len: {len(targets['labels'])}")
+        print(f'predicted labels: {labels}, len: {len(labels)}')
 
     COLORS = np.random.uniform(128, 255, size=(100, 3))
     alpha = 1 
@@ -232,7 +244,7 @@ def ShowResults(model, sample):
             #convert the original PIL image into NumPy format
             image = np.array(image)
             # convert from RGN to OpenCV BGR format
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            # image = cv2.cvtColor(image, cv2.COLOR_RGB2CBGR)
             # apply mask on the image
             cv2.addWeighted(image, alpha, segmentation_map, beta, gamma, image)
             # draw the bounding boxes around the objects

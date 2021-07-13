@@ -1,3 +1,4 @@
+from random import Random, random
 import torch
 from dataset import CityscapesInstanceSegmentation
 from utils import HyperParams, collate_fn, ShowResults, load_model
@@ -27,11 +28,7 @@ parameters = list(model.roi_heads.box_predictor.parameters()) + list(model.roi_h
 optimizer = optim.Adam(parameters, lr=HyperParams.lr, weight_decay=HyperParams.weight_decay)
 
 # Train
-train_model(model, optimizer, data_loader_train, data_loader_val)
-#train_model(model, optimizer, data_loader_train, data_loader_val, plot=False)
-
-# Load Pre-Trained Model
-#load_model(model, optimizer)
+train_model(model, optimizer, data_loader_train, data_loader_val, save_model=True)
 
 # Show visual results
-ShowResults(model, dataset_val[3])
+ShowResults(model,sample=dataset_val[Random.randint(0,dataset_val.__len__())])

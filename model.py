@@ -1,5 +1,6 @@
 import torch
 import os
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch.nn as nn
 import torchvision.models.detection as detection
 from collections import OrderedDict
@@ -28,11 +29,12 @@ def Team6_MaskRCNN(num_classes: int, hidden_layer: int, min_size: int, max_size:
 
     return model
 
-def train_model(model, optimizer, dataloader_train, dataloader_val):
+def train_model(model, optimizer, dataloader_train, dataloader_val, save_model = False):
     model.to(device)
     model.train()
     train_losses = Losses()
-    val_losses = Losses()
+    val_losses = Losses()    
+    scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=2, verbose=True)
     for e in range(HyperParams.epochs):
         # TRAIN
         print('Training epoch ' + str(e))
@@ -40,7 +42,8 @@ def train_model(model, optimizer, dataloader_train, dataloader_val):
         for i, (images, targets) in enumerate(dataloader_train):
             optimizer.zero_grad()
             loss_dict = model(images, targets)
-            loss = sum(loss for loss in loss_dict.values())
+            loss = sum(loss for loss in loss_dict.values())            
+            scheduler.step(loss)
             loss.backward()
             optimizer.step()
             
@@ -69,8 +72,11 @@ def train_model(model, optimizer, dataloader_train, dataloader_val):
         val_losses.mean(len(dataloader_val.dataset))
         val_losses.toList()
 
+        plot_losses(train_losses, val_losses)
+
         # # Save model
-        # name = 'model_epoch_' + str(e+1)
-        # save_model(model, optimizer, train_losses, val_losses, path=os.path.join(HyperParams.model_folder, name))
-        # print('Model ' + name + ' saved!')
+        # if (save_model):
+        #     name = 'model_epoch_' + str(e+1)
+        #     save_model(model, optimizer, train_losses, val_losses, path=os.path.join(HyperParams.model_folder, name))
+        #     print('Model ' + name + ' saved!')
     plot_losses(train_losses, val_losses)
