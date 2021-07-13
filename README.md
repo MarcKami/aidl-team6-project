@@ -16,7 +16,7 @@ Advised by professor Laia Tarrés
   
 # Content
 
-- [How to run](#How to run)
+- [How to run](#How-to-run)
 - [Dataset](#Dataset)
 - [Architecture](#Architecture)
 - [Experiments](#Experiments)
@@ -28,7 +28,6 @@ Advised by professor Laia Tarrés
 To run this code you should download and install the following software:
 - [Python 3.8]([https://www.python.org/downloads/release/python-380/](https://www.python.org/downloads/release/python-380/))
 
-  
 
 ## Dataset
 
@@ -58,8 +57,14 @@ data/
 
 3. Define the instance classes. Use `cityscapesScripts/cityscapesscripts/helpers/label.py` to modify the trainIds as suitable for your model. Assign the label 255 to classes that you want to ignore during the training.
 
+![labels](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Labels.PNG)
+
 4. Draw the ground truth masks for the training and validation set using:
 `cityscapesScripts/cityscapesscripts/preparation/json2labelImg.py`  
+
+![json_dir](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/JsonDir.PNG)
+
+![mask_list](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/MaskList.PNG)
 
 ## Installation
 
@@ -83,15 +88,14 @@ The model states are going to be saved inside models folder. To do inference you
 
 To see graphical results or also check the whole process, we used [Visual Studio Code](https://code.visualstudio.com/download) with Python and Jupyter packages. Then you can run the code running `main.py` or `inference.py` file running it in an interactive window.
 
-** SHOW THE IMAGE **
-
+![VSCode](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/VSCode.PNG)
 
 # Experiments
-- [Experiment 1](#Experiment 1)
-- [Experiment 2](#Experiment 2)
-- [Experiment 3](#Experiment 3)
-- [Experiment 4](#Experiment 4)
-- [Experiment 5](#Experiment 5)
+- [Experiment 1](#Experiment-1)
+- [Experiment 2](#Experiment-2)
+- [Experiment 3](#Experiment-3)
+- [Experiment 4](#Experiment-4)
+- [Experiment 5](#Experiment-5)
 ## Experiment 1
 ### Hypotesis
 ### Setup
