@@ -270,7 +270,7 @@ We’ve applied a visualizers to see our results that renders Label + Bounding B
 ## Experiment 1
 Pre-Trained model on COCO without fine-tuning
 ### Hypothesis
-We expect high quality predictions because the Cityscapes dataset exhibits a notorious overlap with the COCO dataset. In particular, from the eight classes we want to predict in Cityscapes, seven of them are also present in COCO (person, car, bicycle, motorcycle, truck, bus and train) while only one (rider) is missing. 
+We expect quality predictions because the Cityscapes dataset exhibits a high overlap with the COCO dataset. In particular, from the eight classes we want to predict in Cityscapes, seven of them are also present in COCO (person, car, bicycle, motorcycle, truck, bus and train) while only one (rider) is missing. 
 ### Setup
 We prepared a set of 6 photos to check the visual results of the inference using this model.
 ### Results
@@ -280,16 +280,17 @@ As we expected the pretrained MaskRCNN was able to accurately detect and segment
 
 ### Conclusions
 The results confirm our intuition that the model without fine-tuning constitutes a very solid baseline model for the classes present in both datasets.
-To make predictions about a the class “rider”, which is not found in [COCO labels](https://gist.github.com/iitzco/3b2ee634a12f154be6e840308abfcab5), we proceed to update the detection and segmentation heads of the MaskRCNN by randomly initializing the last layers and reducing the number of classes from 92 (COCO) to 9 (our subset of Cityscapes including an extra class for the background).  
+
+To make predictions about the class “rider”, which is not found in [COCO labels](https://gist.github.com/iitzco/3b2ee634a12f154be6e840308abfcab5), we proceed to update the detection and segmentation heads of the MaskRCNN by randomly initializing the last layers and reducing to 8 (our subset of Cityscapes) plus one additional class for the background.  
 
 ## Experiment 2
 1000 Samples over 20  epochs with (800, 1024) range random size & lr= 0.001 (default Adam)
 ### Hypothesis
-The updated model should recognise the new class “rider” in the validation images.  To start our fine-tuning we opt for a simplwith a standard learning rate of 0.001
+The updated model should recognise the new class “rider” and distinguish it from "person2in the validation images.  To start our fine-tuning we opt for a simplwith a standard learning rate of 0.001
 ### Setup
-In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper. And we used a vanilla version of Adam optimizer with a learning rate of 0.001.
+In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). And we used a vanilla version of Adam optimizer with a learning rate of 0.001.
 ### Results
-After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting some kind of learning rate decay policy may be necessary to observe a further progression. As a consequence of that stagnation we cannot see all the desired labels, at least with the appropriate confidence, in the predictions. We're able to see the rider class well classified as we wanted but cannot see other relevant classes like person.
+After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting some kind of learning rate decay policy may be necessary to observe a further progression.  As a consequence of that stagnation we cannot see all the desired labels, at least with the appropriate confidence, in the predictions. We're able to see the rider class well classified as we wanted but cannot see other relevant classes like person.
 - Total Loss:
 
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%202/TotalLoss.PNG)
