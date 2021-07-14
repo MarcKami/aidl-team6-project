@@ -148,7 +148,9 @@ Definitions done in the class are:
 -   List of all possible labels defined on this project    
 -   Mask list  
 		
-    `mask_list  = ["person", "rider", "car", "truck", "bus", "train", "motorcycle", "bicycle"]`
+    ```python
+    mask_list  = ["person", "rider", "car", "truck", "bus", "train", "motorcycle", "bicycle"]
+    ```
     
 -   Take the folder path of each subset of metadata      
     ![](https://lh6.googleusercontent.com/j9ciikj2ChKyC_diSjErGaZBjpkYEMATnjB43ZbQJPdlFOe2Oio7Gbp4BAEWAx3djAvTZDiJD_kVOOKaJFLT-IrGosftBZZpHMBrKOyLN4g4JOvahheDDsn8p_9sMi00ZqYdK7Ju)
@@ -178,9 +180,40 @@ Finally, during the training, the model expects 2 arguments so both are defined 
 
 
 # Model
-![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Heads.PNG)
+Our model is a pre-trained Mask-RCNN in COCO Dataset but adapted to our use case. So, to do that, we changed the two last heads of this model to fit it with Cityscapes Dataset.
+The implementation has been change the num of classes of the box predictor head and also have the possibility to change the hidden layers and the random range size of the input images.
+```python
+model = detection.maskrcnn_resnet50_fpn(pretrained=pretrained, min_size=min_size, max_size=max_size)
+    
+# get the number of input features for the classifier
+in_features = model.roi_heads.box_predictor.cls_score.in_features
+# replace the pre-trained head with a new one
+model.roi_heads.box_predictor = FastRCNNPredictor(
+	in_features,
+	num_classes)
+
+# now get the number of input features for the mask classifier
+in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+# and replace the mask predictor with a new one
+model.roi_heads.mask_predictor = nn.Sequential(OrderedDict([
+	    ("conv5_mask", nn.ConvTranspose2d(in_channels=in_features_mask, out_channels=hidden_layer, kernel_size=2, stride=2)),
+	    ("relu", nn.ReLU(inplace=True)),
+	    ("mask_fcn_logits", nn.Conv2d(in_channels= hidden_layer, out_channels=num_classes, kernel_size=1))]))
+
+```
+## Pipeline
+Here we can see the big picture of the whole process that has our pipeline from the dataset adquisition to prediction rendering:
+- [Dataset](#Cityscapes)
+- [Dataset Preparation](##Preparation)
+- [Modified Mask-RCNN](###Modified-Mask-RCNN)
+- [Parameters & Optimizer](###Parameters-&-Optimizer)
+- [Train](###Train)
+- [Output](###Output)
+
+	![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
  
-## Load Dataset
+### Load Dataset
  
 First step is load Train and Validation Dataset provided from Cityscapes and using the Dataset Class defined:
   
@@ -190,7 +223,7 @@ In order to train faster, images have been loaded in memory and then loaded trai
 
 ![](https://lh5.googleusercontent.com/lIgDxQn5YyH5rXycdS7xDcAWMtg5buNLvPSSjVaX_OapnqryEJO2_Dpu1xo6EiOYAeUHJBRsYUOz1OzxhTPsphLyW3cEAqbIsabWda0SLHaC9ytbhqXI0wRPcDCnBOxcw3LQSO-n)
 
-## Mask-RCNN
+### Modified Mask-RCNN 
 
 Next step is the model definition, based on a Mask-RCNN: 
 
@@ -208,16 +241,16 @@ Afterwards, next components of the pretrained Mask-RCNN have been replaced:
     
 ![](https://lh4.googleusercontent.com/5m0jNIkRmHFEaHDYyEG7X3mRmnWAb4lvaKO0vUuewOUaH0ZOVTHzYPspBjtIAjUJseE4TDCugdwHXIcibilz6bt_f-VLOZA_zbUyUZeaqEVFJO9meugcuh53tBFqwI-JTgi2IT3M)  
 
-## Parameters & Optimizer
+### Parameters & Optimizer
 
 Parameters label are defined using the new Fast-CRNN Head Mask and Box predictor and Adam Optimizer has been used in this model: 
 
   ![](https://lh3.googleusercontent.com/EE7zKfJ5XBUMyblhoe3-MbDKtksFToCLlCft59i_8Z6qhiFPTMPuqW9PKLLkK9vcIrQRBqdCSDq3insOWHF0__doWZimGcEMQdwCUv0C1HWchpvlsvMKsZOk7XDo3pBWqDt_I2Py)
 
-## Train
+### Train
 
 
-## Output  
+### Output  
 
 Our head applied on top of the pre-trained Mask-RCNN gives three different kind of outputs: 
 Bounding Box: Box that surrounds the object to identify it. 
