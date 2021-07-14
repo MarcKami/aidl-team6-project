@@ -180,7 +180,9 @@ Finally, during the training, the model expects 2 arguments so both are defined 
 
 
 # Model
-![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Heads.PNG)
+
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Heads.png)
+	
 Our model is a pre-trained Mask-RCNN in COCO Dataset but adapted to our use case. So, to do that, we changed the two last heads of this model to fit it with Cityscapes Dataset.
 The implementation has been change the num of classes of the box predictor head and also have the possibility to change the hidden layers and the random range size of the input images.
 ```python
