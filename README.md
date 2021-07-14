@@ -329,11 +329,9 @@ The behaviour of the learning curves does not match our expectations, as we obse
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_00.PNG)
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_06.PNG)
 ### Conclusions
-The fact that our model excels with "rider" and does not detect "person at all does not seem plausible: while "person" is one of the most common classes in COCO and is the most frequent class in Cityscapes,  "rider" is ten times less frequent than "person" in Cityscapes and does not appear in COCO at all. 
+The fact that our model excels with "rider" and does not detect "person at all does not seem plausible: while "person" is one of the most common classes in COCO and is the most frequent class in Cityscapes,  "rider" is ten times less frequent than "person" in Cityscapes and does not appear in COCO at all.  
 
-
-
-### Conclusions
+After checking our complete pipeline we identified the root-cause of this issue: the torchvision MaskRCNN model expects the trainID 0 for the background and we wrongly assigned it to the class "person".
 
 
 
