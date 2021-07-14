@@ -270,25 +270,26 @@ We’ve applied a visualizers to see our results that renders Label + Bounding B
 ## Experiment 1
 Pre-Trained model on COCO without fine-tuning
 ### Hypothesis
-We expect quality predictions because the Cityscapes dataset exhibits a high overlap with the COCO dataset. In particular, from the eight classes we want to predict in Cityscapes, seven of them are also present in COCO (person, car, bicycle, motorcycle, truck, bus and train) while only one (rider) is missing. 
+We expect quality predictions because the Cityscapes dataset exhibits a high overlap with the COCO dataset. In particular, from the eight classes we want to predict in Cityscapes, seven of them are also present in COCO (person, car, bicycle, motorcycle, truck, bus and train) while only one (rider) is missing. [COCO labels](https://gist.github.com/iitzco/3b2ee634a12f154be6e840308abfcab5)
+
 ### Setup
 We prepared a set of 6 photos to check the visual results of the inference using this model.
 ### Results
-As we expected the pretrained MaskRCNN was able to accurately detect and segmentate the single instances of the above mentioned common classes.  But we noticed that the class `rider`, present in Cityscapes and relevant for autonomous driving use case, is not present in the predicted results not even in the COCO datasat.
+The pretrained MaskRCNN was able to accurately detect and segmentate the single instances of the above mentioned common classes.  As expected, instances of  `rider` are detected but wrongly classified as "person", which is the most similar class present in COCO
 ![Result_00](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%201/Result_00.PNG)
 ![Result_06](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%201/Result_06.PNG)
 
 ### Conclusions
 The results confirm our intuition that the model without fine-tuning constitutes a very solid baseline model for the classes present in both datasets.
 
-To make predictions about the class “rider”, which is not found in [COCO labels](https://gist.github.com/iitzco/3b2ee634a12f154be6e840308abfcab5), we proceed to update the detection and segmentation heads of the MaskRCNN by randomly initializing the last layers and reducing to 8 (our subset of Cityscapes) plus one additional class for the background.  
+To make predictions about the class “rider”, which is only found in Cityscapes, we proceed to update the detection and segmentation heads of the MaskRCNN by randomly initializing the last layers and reducing to number of classes to 8 instance classes plus one additional class for the background.  
 
 ## Experiment 2
 1000 Samples over 20  epochs with (800, 1024) range random size & lr= 0.001 (default Adam)
 ### Hypothesis
-The updated model should recognise the new class “rider” and distinguish it from "person2in the validation images.  To start our fine-tuning we opt for a simplwith a standard learning rate of 0.001
+The updated model should recognise the new class “rider” and distinguish it from "person" in the validation images.  
 ### Setup
-In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). And we used a vanilla version of Adam optimizer with a learning rate of 0.001.
+In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). And we used a vanilla version of Adam optimizer with a constant learning rate of 0.001.
 ### Results
 After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting some kind of learning rate decay policy may be necessary to observe a further progression.  As a consequence of that stagnation we cannot see all the desired labels, at least with the appropriate confidence, in the predictions. We're able to see the rider class well classified as we wanted but cannot see other relevant classes like person.
 - Total Loss:
