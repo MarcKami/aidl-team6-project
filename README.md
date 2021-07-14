@@ -17,7 +17,7 @@ Advised by professor Laia Tarrés
 # Content
 
 - [How to run](#How-to-run)
-- [Dataset](#Dataset)
+- [Dataset](#Cityscapes)
 - [Model](#Model)
 - [Experiments](#Experiments)
 - [Final Conclusions](#Final-Conclusions)
@@ -205,11 +205,11 @@ model.roi_heads.mask_predictor = nn.Sequential(OrderedDict([
 ## Pipeline
 Here we can see the big picture of the whole process that has our pipeline from the dataset adquisition to prediction rendering:
 - [Dataset](#Cityscapes)
-- [Dataset Preparation](##Preparation)
-- [Modified Mask-RCNN](###Modified-Mask-RCNN)
-- [Parameters & Optimizer](###Parameters-&-Optimizer)
-- [Train](###Train)
-- [Output](###Output)
+- [Dataset Preparation](#Preparation)
+- [Modified Mask-RCNN](#Modified-Mask-RCNN)
+- [Parameters & Optimizer](#Parameters-&-Optimizer)
+- [Train](#Train)
+- [Output](#Output)
 
 	![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
  
