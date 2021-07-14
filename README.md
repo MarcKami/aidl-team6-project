@@ -1,6 +1,6 @@
 # Computer Vision for Autonomous Driving
 
-The aim of this project is to create a Computer Vision tool used in the Autonomous Driving Industry. The tool in question is Instance Segmentation with his corresponding labeling and masking. To achieve it, we used a [Mask R-CNN]([https://arxiv.org/abs/1703.06870](https://arxiv.org/abs/1703.06870)) pre-trained in [COCO Dataset](https://cocodataset.org) (very used for object detection), we fine-tuned and did transfer learning to fit it to our use case, that uses [Cityscapes Dataset]([https://www.cityscapes-dataset.com/](https://www.cityscapes-dataset.com/)).
+The aim of this project is to create a Computer Vision tool used in the Autonomous Driving Industry. The tool in question is Instance Segmentation with his corresponding labeling and masking. To achieve it, we used a [Mask R-CNN]([https://arxiv.org/abs/1703.06870](https://arxiv.org/abs/1703.06870)) pre-trained in [COCO Dataset](https://cocodataset.org) (very used for object detection), we fine-tuned and did transfer learning to fit it to our use case, that uses [Cityscapes Dataset](https://www.cityscapes-dataset.com/).
 
 The repo is the Final Project delivery for the UPC [Artificial Intelligence with Deep Learning Postgraduate Course](https://www.talent.upc.edu/ing/estudis/formacio/curs/310401/postgraduate-course-artificial-intelligence-deep-learning/) 2021 edition, authored by:
 - David Albiol
@@ -21,6 +21,7 @@ Advised by professor Laia Tarrés
 - [Model](#Model)
 - [Experiments](#Experiments)
 - [Final Conclusions](#Final-Conclusions)
+- [Future Work](#Future-Work)
 
 # How to run
 
@@ -57,15 +58,55 @@ data/
     3. Repeat steps `i` and `ii` for every city in the dataset
 
 3. Define the instance classes. Use `cityscapesScripts/cityscapesscripts/helpers/label.py` to modify the trainIds as suitable for your model. Assign the label 255 to classes that you want to ignore during the training.
-
-![labels](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Labels.PNG)
+```python
+   labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'unlabeled'            ,  0 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'ego vehicle'          ,  1 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'rectification border' ,  2 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'out of roi'           ,  3 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'static'               ,  4 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
+    Label(  'dynamic'              ,  5 ,      255 , 'void'            , 0       , False        , True         , (111, 74,  0) ),
+    Label(  'ground'               ,  6 ,      255 , 'void'            , 0       , False        , True         , ( 81,  0, 81) ),
+    Label(  'road'                 ,  7 ,      255 , 'flat'            , 1       , False        , False        , (128, 64,128) ),
+    Label(  'sidewalk'             ,  8 ,      255 , 'flat'            , 1       , False        , False        , (244, 35,232) ),
+    Label(  'parking'              ,  9 ,      255 , 'flat'            , 1       , False        , True         , (250,170,160) ),
+    Label(  'rail track'           , 10 ,      255 , 'flat'            , 1       , False        , True         , (230,150,140) ),
+    Label(  'building'             , 11 ,      255 , 'construction'    , 2       , False        , False        , ( 70, 70, 70) ),
+    Label(  'wall'                 , 12 ,      255 , 'construction'    , 2       , False        , False        , (102,102,156) ),
+    Label(  'fence'                , 13 ,      255 , 'construction'    , 2       , False        , False        , (190,153,153) ),
+    Label(  'guard rail'           , 14 ,      255 , 'construction'    , 2       , False        , True         , (180,165,180) ),
+    Label(  'bridge'               , 15 ,      255 , 'construction'    , 2       , False        , True         , (150,100,100) ),
+    Label(  'tunnel'               , 16 ,      255 , 'construction'    , 2       , False        , True         , (150,120, 90) ),
+    Label(  'pole'                 , 17 ,      255 , 'object'          , 3       , False        , False        , (153,153,153) ),
+    Label(  'polegroup'            , 18 ,      255 , 'object'          , 3       , False        , True         , (153,153,153) ),
+    Label(  'traffic light'        , 19 ,      255 , 'object'          , 3       , False        , False        , (250,170, 30) ),
+    Label(  'traffic sign'         , 20 ,      255 , 'object'          , 3       , False        , False        , (220,220,  0) ),
+    Label(  'vegetation'           , 21 ,      255 , 'nature'          , 4       , False        , False        , (107,142, 35) ),
+    Label(  'terrain'              , 22 ,      255 , 'nature'          , 4       , False        , False        , (152,251,152) ),
+    Label(  'sky'                  , 23 ,      255 , 'sky'             , 5       , False        , False        , ( 70,130,180) ),
+    Label(  'person'               , 24 ,        0 , 'human'           , 6       , True         , False        , (255,  0,  0) ),
+    Label(  'rider'                , 25 ,        1 , 'human'           , 6       , True         , False        , (255,  0,  0) ),
+    Label(  'car'                  , 26 ,        2 , 'vehicle'         , 7       , True         , False        , (255,255,255) ),
+    Label(  'truck'                , 27 ,        3 , 'vehicle'         , 7       , True         , False        , (  0,  0, 70) ),
+    Label(  'bus'                  , 28 ,        4 , 'vehicle'         , 7       , True         , False        , (  0, 255, 0) ),
+    Label(  'caravan'              , 29 ,      255 , 'vehicle'         , 7       , True         , True         , (  0,  0, 90) ),
+    Label(  'trailer'              , 30 ,      255 , 'vehicle'         , 7       , True         , True         , (  0,  0,110) ),
+    Label(  'train'                , 31 ,        5 , 'vehicle'         , 7       , True         , False        , (  0, 80,100) ),
+    Label(  'motorcycle'           , 32 ,        6 , 'vehicle'         , 7       , True         , False        , (  0,  0,230) ),
+    Label(  'bicycle'              , 33 ,        7 , 'vehicle'         , 7       , True         , False        , (  0, 0, 255) ),
+    Label(  'license plate'        , -1 ,       -1 , 'vehicle'         , 7       , False        , True         , (  0,  0,142) ),
+    ]
+```
 
 4. Draw the ground truth masks for the training and validation set using:
 `cityscapesScripts/cityscapesscripts/preparation/json2labelImg.py`  
 
 ![json_dir](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/JsonDir.PNG)
 
-![mask_list](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/MaskList.PNG)
+```python
+mask_list = ["person", "rider", "car", "truck", "bus", "train", "motorcycle", "bicycle"] 
+```
 
 ## Installation
 
@@ -110,34 +151,20 @@ Since the goal was to detect up to 8 different classes in an image, a summary of
 | Cycle         | 0.7k          |
 | Bicycle       | 3.7k          |
 
-
-The scope of this project was to enable the detection of objects among eight different options. Nevertheless, the number of options can be customised when creating the class model. The following image shows the case of this project in which 1 + 8 classes were selected, being 1 the class related to the background. 
-
-![NumClasses](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/NumClasses.PNG)
-
-## Preparation  
-
 The decision to use Cityscapes as provider of the Dataset was based on:
   
-
 -   Well-known predictions of the Dataset in other projects and trannings found and well reputation of the provider
-    
--   Big number of images that Dataset contains
-    
--   Dataset’s folder is ready to use in a project, containing a very good organization
-    
--   High quality of images
-    
--   Cityscapes is a dataset of street scenes suitable to develop autonomous driving applications
-    
--   Most of Cityscapes classes are present in COCO, so the possibility to do Transfer Learning is real
-    
-  
+-   Big number of images that Dataset contains   
+-   Dataset’s folder is ready to use in a project, containing a very good organization   
+-   High quality of images   
+-   Cityscapes is a dataset of street scenes suitable to develop autonomous driving applications 
+-   Most of Cityscapes classes are present in COCO, so the possibility to do Transfer Learning is real    
 
 ![](https://lh6.googleusercontent.com/HKka7K_oa49lCw1v_d8WIJHaqcGTB431w9snZ1mev2T99SvXDd7XcDVy9DE4uYK9ffRkbRsdLvHy8NKTlQ25YpwvyRHcsdJ833cjiNzyz55Ohc5MD-Jrk7dQe-sP2NxoazNu9kx1)
  
+## Preparation  
 
-Anyway, it was necessary to apply a layer of Preprocessing in order to prepare the images before using it as Input and Ground Truth in the Neural Network, everything developed in a class ready to get hyper parameters and train or validation image datasets:
+It was necessary to apply a layer of Preprocessing in order to prepare the images before using it as Input and Ground Truth in the Neural Network, everything developed in a class ready to get hyper parameters and train or validation image datasets:
 	
     class  CityscapesInstanceSegmentation(Dataset)
   
@@ -153,30 +180,67 @@ Definitions done in the class are:
     ```
     
 -   Take the folder path of each subset of metadata      
-    ![](https://lh6.googleusercontent.com/j9ciikj2ChKyC_diSjErGaZBjpkYEMATnjB43ZbQJPdlFOe2Oio7Gbp4BAEWAx3djAvTZDiJD_kVOOKaJFLT-IrGosftBZZpHMBrKOyLN4g4JOvahheDDsn8p_9sMi00ZqYdK7Ju)
+    ```python
+    for city in os.listdir(self.images_dir):
+    	city_images_dir = os.path.join(self.images_dir, city)
+
+    	for image in os.listdir(city_images_dir):
+		#example image name: aachen_000000_000019_leftImg8bit.png
+   		img_name_prefix = '_'.join(image.split('_')[0:3])
+
+   		#example json file name folder -->/Json_Files/aachen_000168_000019_gtFine_polygons.json
+		json_file = os.path.join(self.json_dir, f'{img_name_prefix}_gtFine_polygons.json')
+
+		#example image masks folder -->gtFine/train/aachen_000168_000019_gtFine_polygons
+		img_masks_dir = os.path.join(self.masks_dir, f'{img_name_prefix}_gtFine_polygons')              
+
+		self.images.append(os.path.join(city_images_dir, image))              
+		self.json_files.append(json_file)
+		self.masks.append(img_masks_dir)    
+    ```
 
 Then we should use the Masks contained in the Dataset (gtFine folder) to define each target used as outputs in this project:
 
 -   Labels  
-    ![](https://lh6.googleusercontent.com/DxZIM6lzoDbILm2NDIqmvI1aB7WnpM-0umNbT0HLo7z08ppnlTgFQ5ql15uFxiqcFvqbn3bCCELYGNvKOYsBInKGmOk8wdFodFgQRCRgFE3loGjPh8dBIOQneCDHEY59jRdfb0Vt)
+    ```python
+    def labels_from_mask (self, index):
+    ```
     
 -   Boxes  
-    ![](https://lh6.googleusercontent.com/B3oB-strDx62qgLPAjM60GC_oWNdrlzg2GBjRvHah_7TMT_dGN1AbDrMe2k7wweq0AUeCtxiR9zLrzewiUYHUmBdWYchS5V9qHwedIotxt4Wbg7WjxML_h0-jMIp_laELzsvd_yF)  
+    ```python
+    def boxes_from_mask(self, index):
+    ```
     
 -   Masks
-
-    ![](https://lh4.googleusercontent.com/CoavpqhKLMac3nds4-6wP0fndB6dELUQe9dxe624MCfEhNCbhwtW73SeF9LEeSA5wQ48PGi7gqJTUas_cqmdWCeMou4FJisGIVSPEdZ5zIOktQwTpw3XuvnNcA4x_dnPx1BXkFpB)
+     ```python
+    for mask in os.listdir(self.masks[index]):
+		mask_path = os.path.join(self.masks[index], mask)
+		mask = Image.open(mask_path)
+		mask = ImageOps.invert(mask) # 0:background, 1:instance
+		masks.append(mask)
+    ```
 
 
 Finally, during the training, the model expects 2 arguments so both are defined in this class:
   
 -   Input tensors:  
     Input images converted to RGB and transformed into a Tensor with a defined size
-    ![](https://lh3.googleusercontent.com/p7Iynb6aLhzN1H4jGSZwYiw8dM45-5OL8gSwr8ZCd-17ALzFDQw8ynat9pk2JwrmtGSM8t3sjC1yYBrenxtFYiDRQl0sZPUA4WnuV0gEafICisBkMKXJ30kC9OmIxpiwlhSKbTaA)  
+    ```python
+    image = Image.open(self.images[index]).convert('RGB')         
+    image = transforms.ToTensor()(image)
+    ```
   
 -   Targets:  
     Output targets are defined and converted into Tensors
-    ![](https://lh4.googleusercontent.com/GCsDNkxeR-5qtNAup7QUbI4-fS3_bu41Eqlq3ZKVvdIKrZJblJiUQtPwhUCndklufwQnVqFOCgjFX1AzVb1D4S63zax2sbdLQ440a9eSxM2Vu7PDn9xcRunNYk8Sb0Zd_P9YaZXf)
+    ```python
+    masks = [m for m in targets["masks"]]        
+    boxes = [b for b in targets["boxes"]]     
+    labels = [l for l in targets["labels"]]    
+
+    targets = {"boxes": torch.tensor(np.stack(boxes), dtype= torch.float32, device=device), 
+		 "labels": torch.tensor(np.stack(labels), dtype=torch.int64, device=device),
+		 "masks": torch.tensor(np.stack(masks), dtype=torch.uint8, device=device)}
+    ```
 
 
 # Model
@@ -185,9 +249,61 @@ Finally, during the training, the model expects 2 arguments so both are defined 
 	
 Our model is a pre-trained Mask-RCNN in COCO Dataset but adapted to our use case. So, to do that, we changed the two last heads of this model to fit it with Cityscapes Dataset.
 The implementation has been change the num of classes of the box predictor head and also have the possibility to change the hidden layers and the random range size of the input images.
+
+## Pipeline
+Here we can see the big picture of the whole process that has our pipeline from the dataset adquisition to prediction rendering:
+- [Dataset](#Cityscapes)
+- [Dataset Preparation](#Preparation)
+- [Modified Mask-RCNN](#Modified-Mask-RCNN)
+- [Parameters & Optimizer](#Parameters-and-Optimizer)
+- [Train](#Train)
+- [Output](#Output)
+
+	![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
+ 
+### Load Dataset
+ 
+First step is load Train and Validation Dataset provided from Cityscapes and using the Dataset Class defined:
+
+```python
+dataset_train = CityscapesInstanceSegmentation(root=HyperParams.dataset_root, split='train')
+dataset_val = CityscapesInstanceSegmentation(root=HyperParams.dataset_root, split='val')
+```
+  
+In order to train faster, images have been loaded in memory and then loaded train and validation dataset:
+
+```python
+# Load images in memory to train faster
+for idx in range(HyperParams.num_samples_train):
+  dataset_train.append_images_targets(idx)
+for idx in range(HyperParams.num_samples_val):
+  dataset_val.append_images_targets(idx)
+
+# Data Loader  
+data_loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=HyperParams.batch_size_train, shuffle='True', num_workers=0,collate_fn=collate_fn)
+data_loader_val = torch.utils.data.DataLoader(dataset_val, batch_size=HyperParams.batch_size_val, shuffle='True', num_workers=0,collate_fn=collate_fn)
+```
+
+### Modified Mask-RCNN 
+
+Next step is the model definition, based on a Mask-RCNN: 
+```python
+model = Team6_MaskRCNN(HyperParams.num_classes, HyperParams.hidden_layer, 
+                        HyperParams.min_size, HyperParams.max_size)
+```
+
+In the definition of the Model, a pretrained Mask-RCNN model has been used based on Resnet50:
 ```python
 model = detection.maskrcnn_resnet50_fpn(pretrained=pretrained, min_size=min_size, max_size=max_size)
+```
+
+Afterwards, next components of the pretrained Mask-RCNN have been replaced:
+
+-   Box Predictor Head
     
+-   Mask Predictor Head
+
+```python    
 # get the number of input features for the classifier
 in_features = model.roi_heads.box_predictor.cls_score.in_features
 # replace the pre-trained head with a new one
@@ -204,53 +320,36 @@ model.roi_heads.mask_predictor = nn.Sequential(OrderedDict([
 	    ("mask_fcn_logits", nn.Conv2d(in_channels= hidden_layer, out_channels=num_classes, kernel_size=1))]))
 
 ```
-## Pipeline
-Here we can see the big picture of the whole process that has our pipeline from the dataset adquisition to prediction rendering:
-- [Dataset](#Cityscapes)
-- [Dataset Preparation](#Preparation)
-- [Modified Mask-RCNN](#Modified-Mask-RCNN)
-- [Parameters & Optimizer](#Parameters-and-Optimizer)
-- [Train](#Train)
-- [Output](#Output)
-
-	![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
- 
-### Load Dataset
- 
-First step is load Train and Validation Dataset provided from Cityscapes and using the Dataset Class defined:
-  
-![](https://lh6.googleusercontent.com/Ht9SgwSmIb0SHS9VdWxptui0fMSabKe1dmpP72hIuc2F2jeifOtGo34U11G6zVOxTGeYVmnakOXaaNqTB7Kzp0UwcEiM1fNMtyQT2DRbvCWRL0DCaqWXMtRh64Thv8coHgCg_fUk)
-
-In order to train faster, images have been loaded in memory and then loaded train and validation dataset:
-
-![](https://lh5.googleusercontent.com/lIgDxQn5YyH5rXycdS7xDcAWMtg5buNLvPSSjVaX_OapnqryEJO2_Dpu1xo6EiOYAeUHJBRsYUOz1OzxhTPsphLyW3cEAqbIsabWda0SLHaC9ytbhqXI0wRPcDCnBOxcw3LQSO-n)
-
-### Modified Mask-RCNN 
-
-Next step is the model definition, based on a Mask-RCNN: 
-
-![](https://lh3.googleusercontent.com/kiSuLV6RH56iIuMLjOs3j3FkeRyvzKAfyhPd-7Vdc7RMXDn8zw334LcN-Z3La7b1zPDdYmrlVv4C7M7Wud9fp8pPrALLyck5aSNOMCO3HA3MlRKtlw11KVm_uIM-ZtKyYkfUiOhP)
-  
-In the definition of the Model, a pretrained Mask-RCNN model has been used based on Resnet50:
-
-![](https://lh5.googleusercontent.com/hdQ7LQzXu5hHOhecHTwMlR3XCgYcSSVtr4d-t0iMnlWWKFnZA9cCOrVO-kWftfCMyExxxufbTq46e88CHXlcvHSWFuxBysvo4QxQOhVY-TxyMRFpMiIaSVNnjeBsnl6bxFJ5WhGG) 
-
-Afterwards, next components of the pretrained Mask-RCNN have been replaced:
-
--   Box Predictor Head
-    
--   Mask Predictor Head
-    
-![](https://lh4.googleusercontent.com/5m0jNIkRmHFEaHDYyEG7X3mRmnWAb4lvaKO0vUuewOUaH0ZOVTHzYPspBjtIAjUJseE4TDCugdwHXIcibilz6bt_f-VLOZA_zbUyUZeaqEVFJO9meugcuh53tBFqwI-JTgi2IT3M)  
 
 ### Parameters and Optimizer
 
 Parameters label are defined using the new Fast-CRNN Head Mask and Box predictor and Adam Optimizer has been used in this model: 
 
-  ![](https://lh3.googleusercontent.com/EE7zKfJ5XBUMyblhoe3-MbDKtksFToCLlCft59i_8Z6qhiFPTMPuqW9PKLLkK9vcIrQRBqdCSDq3insOWHF0__doWZimGcEMQdwCUv0C1HWchpvlsvMKsZOk7XDo3pBWqDt_I2Py)
-
+```python
+parameters = list(model.roi_heads.box_predictor.parameters()) + list(model.roi_heads.mask_predictor.parameters())
+optimizer = optim.Adam(parameters, lr=HyperParams.lr, weight_decay=HyperParams.weight_decay)
+```
 ### Train
 
+The train process has as a result a dict of losses where we can see how our model is going through epochs in each kind of task (label, mask, bounding box). So to have a unique loss we sum all the losses present in the dict and then have the big picture of how is it going
+
+```python
+for i, (images, targets) in enumerate(dataloader_train):
+    optimizer.zero_grad()
+    loss_dict = model(images, targets)
+    loss = sum(loss for loss in loss_dict.values())            
+    scheduler.step(loss)
+    loss.backward()
+    optimizer.step()
+```
+
+In the other hand, to validate, we continue with the model on training mode, bacause on evaluation only returns a prediction without loss, and also only takes as argument an input image. So to solve that, we decided to load the validation data in train mode but without updating the loss neither the optimizer or scheduler.
+
+```python
+for i, (images, targets) in enumerate(dataloader_val):
+    loss_dict = model(images, targets)
+    loss = sum(loss for loss in loss_dict.values())
+```
 
 ### Output  
 
@@ -333,12 +432,16 @@ The fact that our model excels with "rider" and does not detect "person at all d
 
 After checking our complete pipeline we identified the root-cause of this issue: the torchvision MaskRCNN model expects the trainID 0 for the background and we wrongly assigned it to the class "person".
 
-
-
 # Final Conclusions
-- Data preprocessing can be a time consuming task.
-- Pre-implemented tools (typically Github repos) may require major adaptations to be integrated with your dataset/ model implementation.
-- How to preprocess different aspects of a dataset to fit your model/approach.
-- Memory management & optimization can (very) significantly speed up training
-- Transfer learning is a very powerful technique: very good results even without fine-tuning if datasets are similar.
+- The out-of-the-shelf pretrained MaskRCNN yields quality predictions on the Cityscapes classes also present in COCO  without any additional training.
 
+- Through fine-tuning it is possible  to successfully detect and segmentate single instances of the non-COCO class “rider”.
+
+- Since the class “person” was wrongly labeled with the ID=0, usually reserved for the background, ROIs containing this class are not considered by the segmentation branch.
+
+# Future Work
+- Assign  a valid trainID to the class “person” and repeat the experiments. We expect a better behaviour of the learning curves as “person” is handled as non-background class by the model
+
+- Implement the computation of the metrics “mean average precision” and “average precision per class” to assess the model performance and compare it to the state-of-the-art implementations
+
+- Predict additional non-COCO classes present in the  Cityscapes dataset such as caravan and trailer
