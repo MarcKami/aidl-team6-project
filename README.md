@@ -291,7 +291,8 @@ The updated model should recognise the new class “rider” and distinguish it 
 ### Setup
 In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). And we used a vanilla version of Adam optimizer with a constant learning rate of 0.001.
 ### Results
-After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting some kind of learning rate decay policy may be necessary to observe a further progression.  As a consequence of that stagnation we cannot see all the desired labels, at least with the appropriate confidence, in the predictions. We're able to see the rider class well classified as we wanted but cannot see other relevant classes like person.
+After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting underfitting.  The fine-tuned model correctly identifies the class "rider" but on the other hand it seems not to recognise class "person". 
+
 - Total Loss:
 
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%202/TotalLoss.PNG)
@@ -304,7 +305,8 @@ After 4-5 epochs the learning curves stagnate for both training and validation s
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%202/Result_06.PNG)
 
 ### Conclusions
-Given the results, we've able to include the raider class as we want, but other relevant classes are missing. So we think that it's caused by the stagnation of the learning rate in the early stage of the training process. Due this situation, we think that the vanilla Adam is not enough to perform this task, so we'll need an extra experiment to optimize it.
+To observe further progression a learning rate decay policy may be necessary. 
+
 
 ## Experiment 3
 1000 Samples over 10 epochs with (800, 1024) range random size & lr= 0.001 **using ReduceLROnPlateau scheduler**
