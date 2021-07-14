@@ -207,7 +207,7 @@ Here we can see the big picture of the whole process that has our pipeline from 
 - [Dataset](#Cityscapes)
 - [Dataset Preparation](#Preparation)
 - [Modified Mask-RCNN](#Modified-Mask-RCNN)
-- [Parameters & Optimizer](#Parameters-&-Optimizer)
+- [Parameters & Optimizer](#Parameters-and-Optimizer)
 - [Train](#Train)
 - [Output](#Output)
 
@@ -241,7 +241,7 @@ Afterwards, next components of the pretrained Mask-RCNN have been replaced:
     
 ![](https://lh4.googleusercontent.com/5m0jNIkRmHFEaHDYyEG7X3mRmnWAb4lvaKO0vUuewOUaH0ZOVTHzYPspBjtIAjUJseE4TDCugdwHXIcibilz6bt_f-VLOZA_zbUyUZeaqEVFJO9meugcuh53tBFqwI-JTgi2IT3M)  
 
-### Parameters & Optimizer
+### Parameters and Optimizer
 
 Parameters label are defined using the new Fast-CRNN Head Mask and Box predictor and Adam Optimizer has been used in this model: 
 
