@@ -5,21 +5,22 @@ The aim of this project is to create a Computer Vision tool used in the Autonomo
 The repo is the Final Project delivery for the UPC [Artificial Intelligence with Deep Learning Postgraduate Course](https://www.talent.upc.edu/ing/estudis/formacio/curs/310401/postgraduate-course-artificial-intelligence-deep-learning/) 2021 edition, authored by:
 - David Albiol
 - Marc Martos
-- Pablo Sabino
+- Pablo Mayo
 - Marc Robles
 
 Advised by professor Laia Tarrés 
 
 # Instance Segmentation in action
 
-*** SHOW IMAGES OF RESULTS ***
+![Result_1](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%201/Result_01.PNG)
   
 # Content
 
 - [How to run](#How-to-run)
 - [Dataset](#Dataset)
-- [Architecture](#Architecture)
+- [Model](#Model)
 - [Experiments](#Experiments)
+- [Final Conclusions](#Final-Conclusions)
 
 # How to run
 
@@ -29,7 +30,7 @@ To run this code you should download and install the following software:
 - [Python 3.8]([https://www.python.org/downloads/release/python-380/](https://www.python.org/downloads/release/python-380/))
 
 
-## Dataset
+## Dataset Preparation
 
 1.  Download [Cityscapes Dataset]([https://www.cityscapes-dataset.com/](https://www.cityscapes-dataset.com/)) data `gtFine_trainvaltest.zip and leftImg8bit_trainvaltest.zip` and extract them.
 We just need the json files, so extract them into 'Json_files/'. Run scripts/process_dataset.py.
@@ -114,37 +115,164 @@ The scope of this project was to enable the detection of objects among eight dif
 
 ![NumClasses](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/NumClasses.PNG)
 
-## Preparation
+## Preparation  
 
+The decision to use Cityscapes as provider of the Dataset was based on:
+  
+
+-   Well-known predictions of the Dataset in other projects and trannings found and well reputation of the provider
+    
+-   Big number of images that Dataset contains
+    
+-   Dataset’s folder is ready to use in a project, containing a very good organization
+    
+-   High quality of images
+    
+-   Cityscapes is a dataset of street scenes suitable to develop autonomous driving applications
+    
+-   Most of Cityscapes classes are present in COCO, so the possibility to do Transfer Learning is real
+    
+  
+
+![](https://lh6.googleusercontent.com/HKka7K_oa49lCw1v_d8WIJHaqcGTB431w9snZ1mev2T99SvXDd7XcDVy9DE4uYK9ffRkbRsdLvHy8NKTlQ25YpwvyRHcsdJ833cjiNzyz55Ohc5MD-Jrk7dQe-sP2NxoazNu9kx1)
+ 
+
+Anyway, it was necessary to apply a layer of Preprocessing in order to prepare the images before using it as Input and Ground Truth in the Neural Network, everything developed in a class ready to get hyper parameters and train or validation image datasets:
+	
+    class  CityscapesInstanceSegmentation(Dataset)
+  
+
+Definitions done in the class are: 
+  
+-   Label and all meta information about the Dataset  
+-   List of all possible labels defined on this project    
+-   Mask list  
+		
+    `mask_list  = ["person", "rider", "car", "truck", "bus", "train", "motorcycle", "bicycle"]`
+    
+-   Take the folder path of each subset of metadata      
+    ![](https://lh6.googleusercontent.com/j9ciikj2ChKyC_diSjErGaZBjpkYEMATnjB43ZbQJPdlFOe2Oio7Gbp4BAEWAx3djAvTZDiJD_kVOOKaJFLT-IrGosftBZZpHMBrKOyLN4g4JOvahheDDsn8p_9sMi00ZqYdK7Ju)
+
+Then we should use the Masks contained in the Dataset (gtFine folder) to define each target used as outputs in this project:
+
+-   Labels  
+    ![](https://lh6.googleusercontent.com/DxZIM6lzoDbILm2NDIqmvI1aB7WnpM-0umNbT0HLo7z08ppnlTgFQ5ql15uFxiqcFvqbn3bCCELYGNvKOYsBInKGmOk8wdFodFgQRCRgFE3loGjPh8dBIOQneCDHEY59jRdfb0Vt)
+    
+-   Boxes  
+    ![](https://lh6.googleusercontent.com/B3oB-strDx62qgLPAjM60GC_oWNdrlzg2GBjRvHah_7TMT_dGN1AbDrMe2k7wweq0AUeCtxiR9zLrzewiUYHUmBdWYchS5V9qHwedIotxt4Wbg7WjxML_h0-jMIp_laELzsvd_yF)  
+    
+-   Masks
+
+    ![](https://lh4.googleusercontent.com/CoavpqhKLMac3nds4-6wP0fndB6dELUQe9dxe624MCfEhNCbhwtW73SeF9LEeSA5wQ48PGi7gqJTUas_cqmdWCeMou4FJisGIVSPEdZ5zIOktQwTpw3XuvnNcA4x_dnPx1BXkFpB)
+
+
+Finally, during the training, the model expects 2 arguments so both are defined in this class:
+  
+-   Input tensors:  
+    Input images converted to RGB and transformed into a Tensor with a defined size
+    ![](https://lh3.googleusercontent.com/p7Iynb6aLhzN1H4jGSZwYiw8dM45-5OL8gSwr8ZCd-17ALzFDQw8ynat9pk2JwrmtGSM8t3sjC1yYBrenxtFYiDRQl0sZPUA4WnuV0gEafICisBkMKXJ30kC9OmIxpiwlhSKbTaA)  
+  
+-   Targets:  
+    Output targets are defined and converted into Tensors
+    ![](https://lh4.googleusercontent.com/GCsDNkxeR-5qtNAup7QUbI4-fS3_bu41Eqlq3ZKVvdIKrZJblJiUQtPwhUCndklufwQnVqFOCgjFX1AzVb1D4S63zax2sbdLQ440a9eSxM2Vu7PDn9xcRunNYk8Sb0Zd_P9YaZXf)
+
+
+# Model
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Architecture.PNG)
+ 
+## Load Dataset
+ 
+First step is load Train and Validation Dataset provided from Cityscapes and using the Dataset Class defined:
+  
+![](https://lh6.googleusercontent.com/Ht9SgwSmIb0SHS9VdWxptui0fMSabKe1dmpP72hIuc2F2jeifOtGo34U11G6zVOxTGeYVmnakOXaaNqTB7Kzp0UwcEiM1fNMtyQT2DRbvCWRL0DCaqWXMtRh64Thv8coHgCg_fUk)
+
+In order to train faster, images have been loaded in memory and then loaded train and validation dataset:
+
+![](https://lh5.googleusercontent.com/lIgDxQn5YyH5rXycdS7xDcAWMtg5buNLvPSSjVaX_OapnqryEJO2_Dpu1xo6EiOYAeUHJBRsYUOz1OzxhTPsphLyW3cEAqbIsabWda0SLHaC9ytbhqXI0wRPcDCnBOxcw3LQSO-n)
+
+## Mask-RCNN
+
+Next step is the model definition, based on a Mask-RCNN: 
+
+![](https://lh3.googleusercontent.com/kiSuLV6RH56iIuMLjOs3j3FkeRyvzKAfyhPd-7Vdc7RMXDn8zw334LcN-Z3La7b1zPDdYmrlVv4C7M7Wud9fp8pPrALLyck5aSNOMCO3HA3MlRKtlw11KVm_uIM-ZtKyYkfUiOhP)
+  
+In the definition of the Model, a pretrained Mask-RCNN model has been used based on Resnet50:
+
+![](https://lh5.googleusercontent.com/hdQ7LQzXu5hHOhecHTwMlR3XCgYcSSVtr4d-t0iMnlWWKFnZA9cCOrVO-kWftfCMyExxxufbTq46e88CHXlcvHSWFuxBysvo4QxQOhVY-TxyMRFpMiIaSVNnjeBsnl6bxFJ5WhGG) 
+
+Afterwards, next components of the pretrained Mask-RCNN have been replaced:
+
+-   Box Predictor Head
+    
+-   Mask Predictor Head
+    
+![](https://lh4.googleusercontent.com/5m0jNIkRmHFEaHDYyEG7X3mRmnWAb4lvaKO0vUuewOUaH0ZOVTHzYPspBjtIAjUJseE4TDCugdwHXIcibilz6bt_f-VLOZA_zbUyUZeaqEVFJO9meugcuh53tBFqwI-JTgi2IT3M)  
+
+## Parameters & Optimizer
+
+Parameters label are defined using the new Fast-CRNN Head Mask and Box predictor and Adam Optimizer has been used in this model: 
+
+  ![](https://lh3.googleusercontent.com/EE7zKfJ5XBUMyblhoe3-MbDKtksFToCLlCft59i_8Z6qhiFPTMPuqW9PKLLkK9vcIrQRBqdCSDq3insOWHF0__doWZimGcEMQdwCUv0C1HWchpvlsvMKsZOk7XDo3pBWqDt_I2Py)
+
+## Train
+
+
+## Output  
+
+Our head applied on top of the pre-trained Mask-RCNN gives three different kind of outputs: 
+Bounding Box: Box that surrounds the object to identify it. 
+Label: Result of the classification processes between our 8 classes that classifies the object inside the Bounding Box.
+Mask: Polygonal mask that has the same shape as the object labeled inside the bounding box.
+
+We’ve applied a visualizers to see our results that renders Label + Bounding Box + Mask combined with different colors per each instance:
+
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/img/Output.PNG)
 
 # Experiments
 - [Experiment 1](#Experiment-1)
 - [Experiment 2](#Experiment-2)
 - [Experiment 3](#Experiment-3)
-- [Experiment 4](#Experiment-4)
-- [Experiment 5](#Experiment-5)
 ## Experiment 1
-### Hypotesis
+Pre-Trained model on COCO without fine-tuning
+### Hypothesis
+We expect high quality predictions because the Cityscapes dataset exhibits a notorious overlap with the COCO dataset. In particular, from the eight classes we want to predict in Cityscapes, seven of them are also present in COCO (person, car, bicycle, motorcycle, truck, bus and train) while only one (rider) is missing. 
 ### Setup
+We prepared a set of 6 photos to check the visual results of the inference using this model.
 ### Results
+As we expected the pretrained MaskRCNN was able to accurately detect and segmentate the single instances of the above mentioned common classes.  But we noticed that the class `rider`, present in Cityscapes and relevant for autonomous driving use case, is not present in the predicted results not even in the COCO datasat.
+![Result_00](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%201/Result_00.PNG)
+![Result_06](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%201/Result_06.PNG)
+
 ### Conclusions
+The results confirm our intuition that the model without fine-tuning constitutes a very solid baseline model for the classes present in both datasets.
+To make predictions about a the class “rider”, which is not found in [COCO labels](https://gist.github.com/iitzco/3b2ee634a12f154be6e840308abfcab5), we proceed to update the detection and segmentation heads of the MaskRCNN by randomly initializing the last layers and reducing the number of classes from 92 (COCO) to 9 (our subset of Cityscapes including an extra class for the background).  
+
 ## Experiment 2
-### Hypotesis
+1000 Samples over 20  epochs with (800, 1024) range random size & lr= 0.001 (default Adam)
+### Hypothesis
+The updated model should recognise the new class “rider” in the validation images.  To start our fine-tuning we opt for a simplwith a standard learning rate of 0.001
 ### Setup
+In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper. And we used a vanilla version of Adam optimizer with a learning rate of 0.001.
 ### Results
+After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting some kind of learning rate decay policy may be necessary to observe a further progression
 ### Conclusions
+TODO
+
 ## Experiment 3
+1000 Samples over 10 epochs with (800, 1024) range random size & lr= 0.001 **using ReduceLROnPlateau scheduler**
 ### Hypotesis
+Given the good results on the first steps of the previous experiment and the stuck on the learning of the model, we expect to solve this problem and have better results implementing an [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html) scheduler and update the learning rate accordingly.
 ### Setup
+In this case we used the same set of 1000 training images and 200 validation images. This time we used the same learning rate given the results in the previous experiment, but in the other hand, as a result of lr stuck, we decide to implement the scheduler [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html)
 ### Results
+TODO
 ### Conclusions
-## Experiment 4
-### Hypotesis
-### Setup
-### Results
-### Conclusions
-## Experiment 5
-### Hypotesis
-### Setup
-### Results
-### Conclusions
+TODO
+
+# Final Conclusions
+- Data preprocessing can be a time consuming task.
+- Pre-implemented tools (typically Github repos) may require major adaptations to be integrated with your dataset/ model implementation.
+- How to preprocess different aspects of a dataset to fit your model/approach.
+- Memory management & optimization can (very) significantly speed up training
+- Transfer learning is a very powerful technique: very good results even without fine-tuning if datasets are similar.
+
