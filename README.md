@@ -313,6 +313,16 @@ Given the good results on the first steps of the previous experiment and the stu
 In this case we used the same set of 1000 training images and 200 validation images. This time we used the same learning rate given the results in the previous experiment, but in the other hand, as a result of lr stuck, we decide to implement the scheduler [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html)
 ### Results
 TODO
+- Total Loss:
+
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/TotalLoss.PNG)
+- Splited Losses:
+
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/SplitLoss.PNG)
+- Visual Results:
+
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_00.PNG)
+![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_06.PNG)
 ### Conclusions
 TODO
 
