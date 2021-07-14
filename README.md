@@ -289,7 +289,7 @@ To make predictions about the class “rider”, which is only found in Cityscap
 ### Hypothesis
 The updated model should recognise the new class “rider” and distinguish it from "person" in the validation images.  
 ### Setup
-In this case we prepared a set of 1000 training images and 200 validation images. As a data augmentation technique, we used random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). And we used a vanilla version of Adam optimizer with a constant learning rate of 0.001.
+We prepare a set of 1000 training images and 200 validation images. As a data augmentation technique, we use random image resizing from 800 and 1024 pixels (short side) as in the MaskRCNN Paper (https://arxiv.org/abs/1703.06870). As optimizer we use Adam with a constant learning rate of 0.001.
 ### Results
 After 4-5 epochs the learning curves stagnate for both training and validation sets, suggesting underfitting.  The fine-tuned model correctly identifies the class "rider" but on the other hand it seems not to recognise class "person". 
 
@@ -311,11 +311,13 @@ To observe further progression a learning rate decay policy may be necessary.
 ## Experiment 3
 1000 Samples over 10 epochs with (800, 1024) range random size & lr= 0.001 **using ReduceLROnPlateau scheduler**
 ### Hypotesis
-Given the good results on the first steps of the previous experiment and the stuck on the learning of the model, we expect to solve this problem and have better results implementing an [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html) scheduler and update the learning rate accordingly. This should resolve the classification problem that we have with person class and other classes missing in the experiment 2 predictions
-### Setup
-In this case we used the same set of 1000 training images and 200 validation images. This time we used the same learning rate given the results in the previous experiment, but in the other hand, as a result of lr stuck, we decide to implement the scheduler [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html)
+Learning rate decay is a technique that aims the model to converge and avoid oscillations which prevent the optimizer to get to a local minimum By using a Learning Rate Scheduler we expect to observe an improvement in the learning curves, specially in the epochs, where the learning rate is reduced, thus allowing the model to succesfully recognise both "rider" and "person".
+
+### Setup 
+We use the same set of 1000 training images and 200 validation images. Starting with the learning rate of 0.001 (as in the previous experiment) we define a Scheduler that reduces it when no significant loss reduction is observed for a few epochs [ReduceLROnPlateau](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html). 
 ### Results
-TODO
+The behaviour of the learning curves does not match our expectations, as we observe again a stagnation after few epochs of training. Furthermore the model still does not detect the class "person". 
+
 - Total Loss:
 
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/TotalLoss.PNG)
@@ -327,7 +329,13 @@ TODO
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_00.PNG)
 ![](https://github.com/MarcKami/aidl-team6-project/blob/master/docs/exps/Experiment%203/Result_06.PNG)
 ### Conclusions
-TODO
+The fact that our model excels with "rider" and does not detect "person at all does not seem plausible: while "person" is one of the most common classes in COCO and is the most frequent class in Cityscapes,  "rider" is ten times less frequent than "person" in Cityscapes and does not appear in COCO at all. 
+
+
+
+### Conclusions
+
+
 
 # Final Conclusions
 - Data preprocessing can be a time consuming task.
